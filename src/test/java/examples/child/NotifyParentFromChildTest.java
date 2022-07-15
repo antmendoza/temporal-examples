@@ -1,41 +1,30 @@
-package standalone;
+package examples.child;
 
 import io.temporal.activity.ActivityInterface;
 import io.temporal.activity.ActivityMethod;
-import io.temporal.activity.ActivityOptions;
-import io.temporal.api.workflowservice.v1.ListClosedWorkflowExecutionsRequest;
-import io.temporal.api.workflowservice.v1.ListClosedWorkflowExecutionsResponse;
+import io.temporal.api.workflowservice.v1.ListOpenWorkflowExecutionsResponse;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.client.WorkflowStub;
+import io.temporal.testing.TestWorkflowEnvironment;
 import io.temporal.testing.TestWorkflowRule;
 import io.temporal.workflow.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-
-import java.time.Duration;
+import query.QueryWorkflow;
 
 public class NotifyParentFromChildTest {
 
 
-
     @Rule
     public TestWorkflowRule testWorkflowRule = TestWorkflowRule.newBuilder()
-            .setWorkflowTypes(WorkflowImpl.class, ChildWfImpl.class)
+            .setWorkflowTypes(NotifyParentFromChildImpl.class, ChildWfImpl.class)
             .setDoNotStart(true)
             .build();
 
-    private final static String PARENT_WF_ID = "workflowId";
-
-
-    private final static String    CHILD_WF_ID = "ChildWf";
-
-
-    final static ActivityOptions options = ActivityOptions.newBuilder()
-            .setScheduleToCloseTimeout(Duration.ofSeconds(2))
-            .build();
+    private final static String workflowId = "workflowId";
 
 
     @After
@@ -49,9 +38,8 @@ public class NotifyParentFromChildTest {
 
 
         final WorkflowClient workflowClient = testWorkflowRule.getWorkflowClient();
-
-
-        testWorkflowRule.getWorker().registerActivitiesImplementations(new ActivitySignalParentFromChildImpl(workflowClient));
+        testWorkflowRule.getWorker().registerActivitiesImplementations(new ActivitySignalParentFromChildImpl(
+                workflowClient));
 
 
         testWorkflowRule.getTestEnvironment()
@@ -59,11 +47,15 @@ public class NotifyParentFromChildTest {
 
         final WorkflowOptions workflowOptions = WorkflowOptions.newBuilder()
                 .setTaskQueue(testWorkflowRule.getTaskQueue())
-                .setWorkflowId(PARENT_WF_ID)
+                .setWorkflowId(workflowId)
                 .build();
 
 
-        final WorkflowStub iWorkflow = workflowClient.newUntypedWorkflowStub("IWorkflow", workflowOptions);
+
+        final TestWorkflowEnvironment testEnvironment = testWorkflowRule.getTestEnvironment();
+
+
+        final WorkflowStub iWorkflow = workflowClient.newUntypedWorkflowStub("NotifyParentFromChild", workflowOptions);
         iWorkflow.start();
 
         sleep(200);
@@ -74,25 +66,17 @@ public class NotifyParentFromChildTest {
         sleep(200);
 
 
-        final WorkflowStub childWf = workflowClient.newUntypedWorkflowStub(CHILD_WF_ID);
+        final WorkflowStub childWf = workflowClient.newUntypedWorkflowStub("ChildWf");
         childWf.signal("signal_1");
 
         sleep(2000);
 
+        Assert.assertEquals("signaled_1", iWorkflow.query("queryChildStatus", String.class));
 
-        Assert.assertEquals("childStatus", iWorkflow.query("queryChildStatus", String.class));
+        ListOpenWorkflowExecutionsResponse listResponse = new QueryWorkflow(testEnvironment.getWorkflowServiceStubs(),
+                testEnvironment.getNamespace()).open();
 
-        ListClosedWorkflowExecutionsRequest listRequest = ListClosedWorkflowExecutionsRequest.newBuilder()
-                .setNamespace(testWorkflowRule.getTestEnvironment()
-                        .getNamespace())
-                .build();
-        ListClosedWorkflowExecutionsResponse listResponse = testWorkflowRule.getTestEnvironment()
-                .getWorkflowServiceStubs()
-                .blockingStub()
-                .listClosedWorkflowExecutions(listRequest);
-
-
-        Assert.assertEquals(1, listResponse.getExecutionsCount());
+        Assert.assertEquals(0, listResponse.getExecutionsCount());
 
     }
 
@@ -107,7 +91,7 @@ public class NotifyParentFromChildTest {
 
 
     @WorkflowInterface
-    public interface IWorkflow {
+    public interface NotifyParentFromChild {
 
 
         @WorkflowMethod
@@ -135,12 +119,9 @@ public class NotifyParentFromChildTest {
         @SignalMethod
         void signal_1();
 
-        @SignalMethod
-        void signal_2();
-
     }
 
-    public static class WorkflowImpl implements IWorkflow {
+    public static class NotifyParentFromChildImpl implements NotifyParentFromChild {
 
         private boolean signalArrived;
         private ChildWf childWf;
@@ -151,7 +132,7 @@ public class NotifyParentFromChildTest {
         public void start(String name) {
 
             childWf = Workflow.newChildWorkflowStub(ChildWf.class, ChildWorkflowOptions.newBuilder()
-                    .setWorkflowId(CHILD_WF_ID)
+                    .setWorkflowId("ChildWf")
                     .build());
 
             Promise<Void> childWfResult = Async.procedure(childWf::start);
@@ -159,7 +140,7 @@ public class NotifyParentFromChildTest {
             childWfResult.get();
 
 
-            Workflow.await(() -> this.signalArrived);
+            io.temporal.workflow.Workflow.await(() -> this.signalArrived);
 
 
         }
@@ -185,24 +166,15 @@ public class NotifyParentFromChildTest {
     public static class ChildWfImpl implements ChildWf {
 
         private boolean signaled_1;
-        private boolean signaled_2;
 
         @Override
         public void start() {
 
+            io.temporal.workflow.Workflow.await(() -> this.signaled_1);
 
+            NotifyParentFromChild parent =   Workflow.newExternalWorkflowStub(NotifyParentFromChild.class, Workflow.getInfo().getParentWorkflowId().get());
 
-            Workflow.await(() -> this.signaled_1);
-
-            ActivitySignalParentFromChild queryChild = Workflow.newActivityStub(ActivitySignalParentFromChild.class, options);
-
-            queryChild.signalParent("signaled_1");
-
-
-            Workflow.await(() -> this.signaled_2);
-
-            queryChild.signalParent("signaled_2");
-
+            parent.signalFromChild("signaled_1");
 
         }
 
@@ -212,11 +184,6 @@ public class NotifyParentFromChildTest {
             this.signaled_1 = true;
         }
 
-        @Override
-        public void signal_2() {
-
-            this.signaled_2 = true;
-        }
 
     }
 
@@ -245,8 +212,8 @@ public class NotifyParentFromChildTest {
         public void signalParent(final String childStatus) {
 
 
-            workflowClient.newWorkflowStub(IWorkflow.class, WorkflowOptions.newBuilder()
-                    .setWorkflowId(PARENT_WF_ID)
+            workflowClient.newWorkflowStub(NotifyParentFromChild.class, WorkflowOptions.newBuilder()
+                    .setWorkflowId(workflowId)
                     .build()).signalFromChild(childStatus);
 
         }
