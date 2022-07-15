@@ -1,4 +1,4 @@
-package query;
+package clients.query;
 
 import io.temporal.api.workflowservice.v1.ListClosedWorkflowExecutionsRequest;
 import io.temporal.api.workflowservice.v1.ListClosedWorkflowExecutionsResponse;
@@ -29,7 +29,7 @@ public class QueryWorkflow {
 
     }
 
-    public ListOpenWorkflowExecutionsResponse open() {
+    public ListOpenWorkflowExecutionsResponse opened() {
 
         ListOpenWorkflowExecutionsRequest listRequest = ListOpenWorkflowExecutionsRequest.newBuilder()
                 .setNamespace(this.namespace)

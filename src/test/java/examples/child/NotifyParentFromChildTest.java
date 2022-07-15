@@ -13,7 +13,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import query.QueryWorkflow;
+import clients.query.QueryWorkflow;
 
 public class NotifyParentFromChildTest {
 
@@ -74,7 +74,7 @@ public class NotifyParentFromChildTest {
         Assert.assertEquals("signaled_1", iWorkflow.query("queryChildStatus", String.class));
 
         ListOpenWorkflowExecutionsResponse listResponse = new QueryWorkflow(testEnvironment.getWorkflowServiceStubs(),
-                testEnvironment.getNamespace()).open();
+                testEnvironment.getNamespace()).opened();
 
         Assert.assertEquals(0, listResponse.getExecutionsCount());
 

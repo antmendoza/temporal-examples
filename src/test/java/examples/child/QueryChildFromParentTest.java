@@ -18,7 +18,7 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import query.QueryWorkflow;
+import clients.query.QueryWorkflow;
 
 import java.time.Duration;
 
