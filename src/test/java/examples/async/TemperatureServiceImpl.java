@@ -11,12 +11,7 @@ public class TemperatureServiceImpl implements TemperatureService {
                 .findFirst()
                 .getAsInt();
 
-        try {
-            Thread.sleep(timeSleep);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+        sleep(timeSleep);
 
 
         switch (city){
@@ -27,6 +22,15 @@ public class TemperatureServiceImpl implements TemperatureService {
             default:
                 return new TemperatureResponse(city, 25);
 
+        }
+
+    }
+
+    private void sleep(final int timeSleep) {
+        try {
+            Thread.sleep(timeSleep);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }
