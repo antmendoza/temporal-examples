@@ -10,27 +10,16 @@ public class ActivityImpl implements Activity {
 
         ActivityExecutionContext executionContext = io.temporal.activity.Activity.getExecutionContext();
 
-        System.out.println("secondsToWait" + secondsToWait);
+        System.out.println("secondsToWait " + secondsToWait);
 
         for (int i = 0; i < secondsToWait; i++) {
             sleep(1);
             try {
                 executionContext.heartbeat(i);
-
-//                final int numAttempts = executionContext.getInfo()
-//                        .getAttempt();
-//                if(numAttempts < 2){
-//                    throw new IllegalStateException("test " +secondsToWait);
-//                }else{
-//                    System.out.println("executionContext.getInfo().getAttempt() " + numAttempts);
-//                }
-
             } catch (ActivityCompletionException e) {
                 System.out.println("ActivityId  " + secondsToWait + " shutdown.. ");
                 throw e;
-
             }
-
         }
 
 

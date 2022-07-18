@@ -3,6 +3,8 @@ package examples.activity.cancel;
 import io.temporal.activity.ActivityCancellationType;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
+import io.temporal.failure.ActivityFailure;
+import io.temporal.failure.CanceledFailure;
 import io.temporal.workflow.Async;
 import io.temporal.workflow.CancellationScope;
 import io.temporal.workflow.Promise;
@@ -42,7 +44,9 @@ public class CancelActivityWfImpl implements CancelActivityWf {
             IntStream.rangeClosed(1, 3)
                     .asLongStream()
                     .forEach((secondsToWait) -> {
-                        activityResults.add(Async.function(activity::longRunningMethod, secondsToWait));
+                        activityResults.add(Async.function(activity::longRunningMethod, secondsToWait)
+
+                        );
                     });
         });
 
@@ -54,18 +58,6 @@ public class CancelActivityWfImpl implements CancelActivityWf {
                 .get();
 
         System.out.println("firsResult " +firsResult);
-
-      //  this.cancellationScope.cancel();
-
-//        for (Promise<String> activityResult : activityResults) {
-//            try {
-//                activityResult.get();
-//            } catch (ActivityFailure e) {
-//                if (!(e.getCause() instanceof CanceledFailure)) {
-//                    throw e;
-//                }
-//            }
-//        }
 
         Workflow.await(() -> this.completeWf);
 

@@ -38,10 +38,9 @@ public class ActivityFailWfImpl implements ActivityFailWf {
 
         try{
             activity.longRunningMethod("");
-
         }catch (ActivityFailure activityFailure){
+            // look inside activityFailure
             activity.compensateLongRunningMethod("");
-
         }
 
         return "done";

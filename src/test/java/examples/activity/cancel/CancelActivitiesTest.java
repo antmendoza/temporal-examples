@@ -49,7 +49,7 @@ public class CancelActivitiesTest {
 
         cancelActivityWf.start();
 
-        sleep(2);
+        sleep(4);
 
         cancelActivityWf.signal("cancelRemainingActivities");
 
