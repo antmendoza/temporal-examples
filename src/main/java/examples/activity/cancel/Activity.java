@@ -1,4 +1,4 @@
-package examples.cancel.activity;
+package examples.activity.cancel;
 
 import io.temporal.activity.ActivityInterface;
 import io.temporal.activity.ActivityMethod;

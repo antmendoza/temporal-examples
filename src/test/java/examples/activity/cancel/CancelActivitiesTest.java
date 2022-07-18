@@ -1,9 +1,8 @@
-package examples.cancel.activity;
+package examples.activity.cancel;
 
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.client.WorkflowStub;
-import io.temporal.testing.TestActivityEnvironment;
 import io.temporal.testing.TestWorkflowRule;
 import io.temporal.worker.WorkerOptions;
 import org.junit.After;

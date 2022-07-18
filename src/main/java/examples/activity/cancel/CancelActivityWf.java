@@ -1,4 +1,4 @@
-package examples.cancel.activity;
+package examples.activity.cancel;
 
 import io.temporal.workflow.SignalMethod;
 import io.temporal.workflow.WorkflowInterface;

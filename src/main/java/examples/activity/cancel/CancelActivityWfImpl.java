@@ -1,4 +1,4 @@
-package examples.cancel.activity;
+package examples.activity.cancel;
 
 import io.temporal.activity.ActivityCancellationType;
 import io.temporal.activity.ActivityOptions;
@@ -46,14 +46,26 @@ public class CancelActivityWfImpl implements CancelActivityWf {
                     });
         });
 
+
         // start cancellation scope
         cancellationScope.run();
-
 
         final String firsResult = Promise.anyOf(activityResults)
                 .get();
 
         System.out.println("firsResult " +firsResult);
+
+      //  this.cancellationScope.cancel();
+
+//        for (Promise<String> activityResult : activityResults) {
+//            try {
+//                activityResult.get();
+//            } catch (ActivityFailure e) {
+//                if (!(e.getCause() instanceof CanceledFailure)) {
+//                    throw e;
+//                }
+//            }
+//        }
 
         Workflow.await(() -> this.completeWf);
 
