@@ -15,7 +15,7 @@ public class ActivityFailureTest {
 
     @Rule
     public TestWorkflowRule testWorkflowRule = TestWorkflowRule.newBuilder()
-            .setWorkflowTypes(ActivityFailWfImpl.class)
+            .setWorkflowTypes(WfActivityFailImpl.class)
             .setDoNotStart(true)
             .build();
 
@@ -29,9 +29,9 @@ public class ActivityFailureTest {
     public void test() {
 
 
-        ActivityFail activityFail = Mockito.mock(ActivityFail.class);
+        ActivityFail activityFailMocked = Mockito.mock(ActivityFail.class);
 
-        when(activityFail.longRunningMethod(""))
+        when(activityFailMocked.longRunningMethod(""))
                 .thenThrow(
                         new IllegalStateException("not yet1"),
                         new IllegalStateException("not yet2"))
@@ -39,22 +39,22 @@ public class ActivityFailureTest {
 
 
         testWorkflowRule.getWorker()
-                .registerActivitiesImplementations(activityFail);
+                .registerActivitiesImplementations(activityFailMocked);
         testWorkflowRule.getTestEnvironment()
                 .start();
 
 
-        ActivityFailWf workflow = testWorkflowRule.getWorkflowClient()
-                .newWorkflowStub(ActivityFailWf.class, WorkflowOptions.newBuilder()
+        WfActivityFail workflow = testWorkflowRule.getWorkflowClient()
+                .newWorkflowStub(WfActivityFail.class, WorkflowOptions.newBuilder()
                         .setTaskQueue(testWorkflowRule.getTaskQueue())
                         .build());
 
 
         workflow.start();
 
-        Mockito.verify(activityFail, Mockito.times(2))
+        Mockito.verify(activityFailMocked, Mockito.times(2))
                 .longRunningMethod(any());
-        Mockito.verify(activityFail, Mockito.times(1))
+        Mockito.verify(activityFailMocked, Mockito.times(1))
                 .compensateLongRunningMethod(any());
 
     }

@@ -9,6 +9,7 @@ import io.temporal.workflow.Async;
 import io.temporal.workflow.CancellationScope;
 import io.temporal.workflow.Promise;
 import io.temporal.workflow.Workflow;
+import org.slf4j.MDC;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -45,11 +46,9 @@ public class CancelActivityWfImpl implements CancelActivityWf {
                     .asLongStream()
                     .forEach((secondsToWait) -> {
                         activityResults.add(Async.function(activity::longRunningMethod, secondsToWait)
-
                         );
                     });
         });
-
 
         // start cancellation scope
         cancellationScope.run();

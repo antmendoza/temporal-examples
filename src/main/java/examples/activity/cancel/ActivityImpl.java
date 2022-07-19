@@ -2,11 +2,11 @@ package examples.activity.cancel;
 
 import io.temporal.activity.ActivityExecutionContext;
 import io.temporal.client.ActivityCompletionException;
+import org.slf4j.MDC;
 
 public class ActivityImpl implements Activity {
     @Override
     public String longRunningMethod(long secondsToWait) {
-
 
         ActivityExecutionContext executionContext = io.temporal.activity.Activity.getExecutionContext();
 

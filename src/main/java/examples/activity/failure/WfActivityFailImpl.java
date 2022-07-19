@@ -4,17 +4,12 @@ import io.temporal.activity.ActivityCancellationType;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
 import io.temporal.failure.ActivityFailure;
-import io.temporal.workflow.Async;
-import io.temporal.workflow.CancellationScope;
-import io.temporal.workflow.Promise;
 import io.temporal.workflow.Workflow;
+import org.slf4j.MDC;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.IntStream;
 
-public class ActivityFailWfImpl implements ActivityFailWf {
+public class WfActivityFailImpl implements WfActivityFail {
 
 
     private final ActivityFail activity = Workflow.newActivityStub(ActivityFail.class, ActivityOptions.newBuilder()
@@ -36,7 +31,11 @@ public class ActivityFailWfImpl implements ActivityFailWf {
     @Override
     public String start() {
 
+            MDC.put("key","value");
         try{
+
+
+
             activity.longRunningMethod("");
         }catch (ActivityFailure activityFailure){
             // look inside activityFailure
