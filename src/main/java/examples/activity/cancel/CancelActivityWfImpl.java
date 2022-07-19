@@ -3,13 +3,10 @@ package examples.activity.cancel;
 import io.temporal.activity.ActivityCancellationType;
 import io.temporal.activity.ActivityOptions;
 import io.temporal.common.RetryOptions;
-import io.temporal.failure.ActivityFailure;
-import io.temporal.failure.CanceledFailure;
 import io.temporal.workflow.Async;
 import io.temporal.workflow.CancellationScope;
 import io.temporal.workflow.Promise;
 import io.temporal.workflow.Workflow;
-import org.slf4j.MDC;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -24,9 +21,9 @@ public class CancelActivityWfImpl implements CancelActivityWf {
             // every 30 seconds
             // which is too rare for the cancellations to be delivered in this example.
             .setHeartbeatTimeout(Duration.ofSeconds(5))
-                    .setRetryOptions(RetryOptions.newBuilder()
-                            .setInitialInterval(Duration.ofSeconds(1))
-                            .build())
+            .setRetryOptions(RetryOptions.newBuilder()
+                    .setInitialInterval(Duration.ofSeconds(1))
+                    .build())
             .setStartToCloseTimeout(Duration.ofSeconds(100))
             //Wait to cancel the activity, for cleaning purpose
             .setCancellationType(ActivityCancellationType.WAIT_CANCELLATION_COMPLETED)
@@ -56,7 +53,7 @@ public class CancelActivityWfImpl implements CancelActivityWf {
         final String firsResult = Promise.anyOf(activityResults)
                 .get();
 
-        System.out.println("firsResult " +firsResult);
+        System.out.println("firsResult " + firsResult);
 
         Workflow.await(() -> this.completeWf);
 
