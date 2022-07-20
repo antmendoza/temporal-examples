@@ -4,9 +4,9 @@ import io.temporal.activity.ActivityInterface;
 import io.temporal.activity.ActivityMethod;
 
 @ActivityInterface
-public interface InterceptorActivity {
+public interface DBActivity {
 
     @ActivityMethod
-    String doActivity(String before);
+    String recordSomething(String before);
 
 }
