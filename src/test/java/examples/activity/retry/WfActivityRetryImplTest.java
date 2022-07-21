@@ -1,6 +1,7 @@
-package examples.activity.failure;
+package examples.activity.retry;
 
 import io.temporal.client.WorkflowOptions;
+import io.temporal.failure.ApplicationFailure;
 import io.temporal.testing.TestWorkflowRule;
 import org.junit.After;
 import org.junit.Rule;
@@ -10,12 +11,12 @@ import org.mockito.Mockito;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-public class ActivityFailureTest {
+public class WfActivityRetryImplTest {
 
 
     @Rule
     public TestWorkflowRule testWorkflowRule = TestWorkflowRule.newBuilder()
-            .setWorkflowTypes(WfActivityFailImpl.class)
+            .setWorkflowTypes(WfActivityRetryImpl.class)
             .setDoNotStart(true)
             .build();
 
@@ -29,32 +30,33 @@ public class ActivityFailureTest {
     public void test() {
 
 
-        ActivityFail activityFailMocked = Mockito.mock(ActivityFail.class);
+        ActivityRetry activityRetryMocked = Mockito.mock(ActivityRetry.class);
 
-        when(activityFailMocked.longRunningMethod(""))
+        when(activityRetryMocked.longRunningMethod(""))
                 .thenThrow(
-                        new IllegalStateException("not yet1"),
-                        new IllegalStateException("not yet2"))
+                        ApplicationFailure.newFailure("not yet1","com.my.CustomException"),
+                        new IllegalStateException("not yet2")
+                        )
                 .thenReturn("");
 
 
         testWorkflowRule.getWorker()
-                .registerActivitiesImplementations(activityFailMocked);
+                .registerActivitiesImplementations(activityRetryMocked);
         testWorkflowRule.getTestEnvironment()
                 .start();
 
 
-        WfActivityFail workflow = testWorkflowRule.getWorkflowClient()
-                .newWorkflowStub(WfActivityFail.class, WorkflowOptions.newBuilder()
+        WfActivityRetry workflow = testWorkflowRule.getWorkflowClient()
+                .newWorkflowStub(WfActivityRetry.class, WorkflowOptions.newBuilder()
                         .setTaskQueue(testWorkflowRule.getTaskQueue())
                         .build());
 
 
         workflow.start();
 
-        Mockito.verify(activityFailMocked, Mockito.times(2))
+        Mockito.verify(activityRetryMocked, Mockito.times(2))
                 .longRunningMethod(any());
-        Mockito.verify(activityFailMocked, Mockito.times(1))
+        Mockito.verify(activityRetryMocked, Mockito.times(1))
                 .compensateLongRunningMethod(any());
 
     }

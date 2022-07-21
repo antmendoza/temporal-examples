@@ -8,6 +8,7 @@ import io.temporal.client.WorkflowOptions;
 import io.temporal.common.converter.DataConverter;
 import io.temporal.testing.TestWorkflowRule;
 import io.temporal.worker.WorkerFactoryOptions;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,6 +29,11 @@ public class InterceptorTest {
                 .build();
 
 
+    @After
+    public void cleanUp() {
+        testWorkflowRule.getTestEnvironment()
+                .shutdown();
+    }
 
     @Test
     public void test() {

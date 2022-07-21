@@ -1,9 +1,9 @@
-package examples.activity.failure;
+package examples.activity.retry;
 
 import io.temporal.activity.ActivityInterface;
 
 @ActivityInterface
-public interface ActivityFail {
+public interface ActivityRetry {
 
     String longRunningMethod(String doSomething);
 

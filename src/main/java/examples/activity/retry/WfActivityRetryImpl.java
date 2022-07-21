@@ -1,4 +1,4 @@
-package examples.activity.failure;
+package examples.activity.retry;
 
 import io.temporal.activity.ActivityCancellationType;
 import io.temporal.activity.ActivityOptions;
@@ -8,16 +8,17 @@ import io.temporal.workflow.Workflow;
 
 import java.time.Duration;
 
-public class WfActivityFailImpl implements WfActivityFail {
+public class WfActivityRetryImpl implements WfActivityRetry {
 
 
-    private final ActivityFail activity = Workflow.newActivityStub(ActivityFail.class, ActivityOptions.newBuilder()
+    private final ActivityRetry activity = Workflow.newActivityStub(ActivityRetry.class, ActivityOptions.newBuilder()
             // if heartbeat timeout is not set, activity heartbeats will be throttled to one
             // every 30 seconds
             // which is too rare for the cancellations to be delivered in this example.
             .setHeartbeatTimeout(Duration.ofSeconds(5))
             .setRetryOptions(RetryOptions.newBuilder()
                     .setInitialInterval(Duration.ofSeconds(1))
+                    //.setDoNotRetry(IllegalStateException.class.getName())
                     .setMaximumAttempts(2)
                     .build())
             .setStartToCloseTimeout(Duration.ofSeconds(100))
