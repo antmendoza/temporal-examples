@@ -79,7 +79,6 @@ public class HelloActivity {
   public interface GreetingActivities {
 
     // Define your activity method which can be called during workflow execution
-    @ActivityMethod(name = "greet")
     String composeGreeting(String greeting, String name);
   }
 
@@ -108,81 +107,6 @@ public class HelloActivity {
     }
   }
 
-  /** Simple activity implementation, that concatenates two strings. */
-  static class GreetingActivitiesImpl implements GreetingActivities {
-    private static final Logger log = LoggerFactory.getLogger(GreetingActivitiesImpl.class);
 
-    @Override
-    public String composeGreeting(String greeting, String name) {
-      log.info("Composing greeting...");
-      return greeting + " " + name + "!";
-    }
-  }
 
-  /**
-   * With our Workflow and Activities defined, we can now start execution. The main method starts
-   * the worker and then the workflow.
-   */
-  public static void main(String[] args) {
-
-    // Get a Workflow service stub.
-    WorkflowServiceStubs service = WorkflowServiceStubs.newLocalServiceStubs();
-
-    /*
-     * Get a Workflow service client which can be used to start, Signal, and Query Workflow Executions.
-     */
-    WorkflowClient client = WorkflowClient.newInstance(service);
-
-    /*
-     * Define the workflow factory. It is used to create workflow workers for a specific task queue.
-     */
-    WorkerFactory factory = WorkerFactory.newInstance(client);
-
-    /*
-     * Define the workflow worker. Workflow workers listen to a defined task queue and process
-     * workflows and activities.
-     */
-    Worker worker = factory.newWorker(TASK_QUEUE);
-
-    /*
-     * Register our workflow implementation with the worker.
-     * Workflow implementations must be known to the worker at runtime in
-     * order to dispatch workflow tasks.
-     */
-    worker.registerWorkflowImplementationTypes(GreetingWorkflowImpl.class);
-
-    /**
-     * Register our Activity Types with the Worker. Since Activities are stateless and thread-safe,
-     * the Activity Type is a shared instance.
-     */
-    worker.registerActivitiesImplementations(new GreetingActivitiesImpl());
-
-    /*
-     * Start all the workers registered for a specific task queue.
-     * The started workers then start polling for workflows and activities.
-     */
-    factory.start();
-
-    // Create the workflow client stub. It is used to start our workflow execution.
-    GreetingWorkflow workflow =
-        client.newWorkflowStub(
-            GreetingWorkflow.class,
-            WorkflowOptions.newBuilder()
-                .setWorkflowId(WORKFLOW_ID)
-                .setTaskQueue(TASK_QUEUE)
-                .build());
-
-    /*
-     * Execute our workflow and wait for it to complete. The call to our getGreeting method is
-     * synchronous.
-     *
-     * See {@link io.temporal.samples.hello.HelloSignal} for an example of starting workflow
-     * without waiting synchronously for its result.
-     */
-    String greeting = workflow.getGreeting("World");
-
-    // Display workflow execution results
-    System.out.println(greeting);
-    System.exit(0);
-  }
 }

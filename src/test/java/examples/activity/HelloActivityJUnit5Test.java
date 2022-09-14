@@ -19,9 +19,12 @@
 
 package examples.activity;
 
+import io.temporal.activity.Activity;
 import io.temporal.testing.TestActivityExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,14 +37,25 @@ public class HelloActivityJUnit5Test {
     @RegisterExtension
     public static final TestActivityExtension testActivityExtension =
             TestActivityExtension.newBuilder()
-                    .setActivityImplementations(new HelloActivity.GreetingActivitiesImpl())
+                    .setActivityImplementations(new GreetingActivitiesImpl())
                     .build();
 
     @Test
     public void testDynamicActivity(HelloActivity.GreetingActivities activity) {
         String result = activity.composeGreeting("Hello", "John");
-        assertEquals("Hello John!", result);
+        assertEquals("Hello John from activity ComposeGreeting!", result);
     }
 
 
+    static class GreetingActivitiesImpl implements HelloActivity.GreetingActivities {
+        private static final Logger log = LoggerFactory.getLogger(GreetingActivitiesImpl.class);
+
+        @Override
+        public String composeGreeting(String greeting, String name) {
+
+            String activityType = Activity.getExecutionContext().getInfo().getActivityType();
+            log.info("Composing greeting...");
+            return greeting + " " + name + " from activity " +activityType+"!";
+        }
+    }
 }
