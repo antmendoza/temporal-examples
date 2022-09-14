@@ -23,7 +23,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
-        <temporal-sdk.version>1.13.0</temporal-sdk.version>
+        <temporal-sdk.version>1.12.0</temporal-sdk.version>
     </properties>
 
     <dependencies>
@@ -66,6 +66,12 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>4.5.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
 
